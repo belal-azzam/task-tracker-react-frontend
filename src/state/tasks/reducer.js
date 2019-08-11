@@ -1,42 +1,54 @@
-import {GET_TASKS, MOVE_TASK} from "./types";
+import {
+    ADD_TASK_DATA,
+    GET_TASKS,
+    HIDE_TASK_MODAL,
+    MOVE_TASK,
+    SET_TASKS_DATA,
+    SHOW_TASK_MODAL,
+    UPDATE_TASK_DATA
+} from "./types";
 const initialState = {
     "tasks": {
-        "task-1": {"id": "task-1", "content": "test 1"},
-        "task-2": {"id": "task-2", "content": "test  2"},
-        "task-3": {"id": "task-3", "content": "test  3"},
-        "task-4": {"id": "task-4", "content": "test  4"},
-        "task-5": {"id": "task-5", "content": "test  4"},
-        "task-6": {"id": "task-6", "content": "test  4"},
-        "task-7": {"id": "task-7", "content": "test  4"},
-        "task-8": {"id": "task-8", "content": "test  4"},
     },
+    "statuses": {
+    },
+    "types": {
 
-    "columns": {
-        "column-1": {
-            "id": "column-1",
-            "title": "TO DO",
-            "taskIds": ["task-1","task-2","task-3", "task-4", "task-5", "task-6", "task-7", "task-8"]
-        },
-        "column-2": {
-            "id": "column-2",
-            "title": "in progress",
-            "taskIds": []
-        },
-        "column-3": {
-            "id": "column-3",
-            "title": "Done",
-            "taskIds": []
-        }
     },
-    "columnOrder": ["column-1", "column-2", "column-3"]
+    "status_order": [],
+    "task_modal": {
+        isShown: false,
+        taskId: null
+    }
 };
 
 export default function (state = initialState, action) {
     switch (action.type)
     {
-        case GET_TASKS:
+        case SET_TASKS_DATA:
+            let statuses = {};
+            let tasks = {};
+            let statusOrder = [];
+            let types = {};
+            action.payload.task_types.forEach(taskType  => {
+                types[taskType.id] = taskType;
+            });
+            action.payload.task_statuses.forEach(taskStatus => {
+                taskStatus.tasks = taskStatus.tasks.map(task => {
+                    tasks[task.id] = task;
+                    return task.id;
+
+                })
+                statuses[taskStatus.id] = taskStatus;
+                statusOrder.push(taskStatus.id);
+            });
+
             return {
-                ...state
+                ...state,
+                tasks: {...tasks},
+                statuses: {...statuses},
+                status_order: statusOrder,
+                types: types,
             };
             break;
         case MOVE_TASK:
@@ -47,6 +59,85 @@ export default function (state = initialState, action) {
             }
             return state;
         break;
+        case SHOW_TASK_MODAL:
+            let taskId = action.payload;
+            if(!taskId)
+            {
+                taskId = null;
+            }
+            return {
+                ...state,
+                task_modal: {
+                    isShown: true,
+                    taskId: taskId
+                }
+            };
+            break;
+        case HIDE_TASK_MODAL:
+            return {
+                ...state,
+                task_modal: {
+                    isShown: false,
+                }
+            }
+            break;
+        case UPDATE_TASK_DATA:
+             const updatedTaskId = action.payload.taskId;
+             let taskData = action.payload.taskData;
+             var oldTaskStatus = state.tasks[updatedTaskId].status_id;
+             if(oldTaskStatus !== taskData.status_id)
+             {
+                 const oldTaskIndex = state.statuses[oldTaskStatus].tasks.indexOf(updatedTaskId);
+                 let oldStatusTasks = state.statuses[oldTaskStatus].tasks.slice();
+                 oldStatusTasks.splice(oldTaskIndex, 1);
+                 let newStatusTasks = state.statuses[taskData.status_id].tasks.slice();;
+                 newStatusTasks.splice(0,0,updatedTaskId);
+                 return {
+                     ...state,
+                     statuses: {
+                         ...state.statuses,
+                        [taskData.status_id]: {
+                            ...state.statuses[taskData.status_id],
+                            tasks: newStatusTasks,
+                        },
+                        [oldTaskStatus]: {
+                            ...state.statuses[oldTaskStatus],
+                            tasks: oldStatusTasks,
+                        }
+                     },
+                     tasks: {
+                         ...state.tasks,
+                         [updatedTaskId]: {...taskData}
+                     }
+                 }
+             }
+
+             return {
+                 ...state,
+                 tasks: {
+                     ...state.tasks,
+                     [updatedTaskId]: {...taskData}
+                 }
+             };
+            break;
+        case ADD_TASK_DATA:
+            let statusNewTasks = state.statuses[action.payload.status_id].tasks.slice();
+            statusNewTasks.splice(0,0, action.payload.id);
+            return {
+                ...state,
+                statuses: {
+                    ...state.statuses,
+                    [action.payload.status_id]: {
+                        ...state.statuses[action.payload.status_id],
+                        tasks: statusNewTasks
+                    }
+                },
+                tasks:{
+                    ...state.tasks,
+                    [action.payload.id]: action.payload
+                }
+            };
+            break;
         default:
             return state;
     }
@@ -54,6 +145,7 @@ export default function (state = initialState, action) {
 
 function moveTask(state, result)
 {
+
     const {destination, source, draggableId} = result;
     if(!destination)
     {
@@ -66,49 +158,49 @@ function moveTask(state, result)
     )
         return;
 
-    const start = state.columns[source.droppableId];
-    const finish = state.columns[destination.droppableId];
+    const start = state.statuses[source.droppableId];
+    const finish = state.statuses[destination.droppableId];
 
     if(start === finish)
     {
-        const newTaskIds = Array.from(start.taskIds);
+        const newTaskIds = Array.from(start.tasks);
         newTaskIds.splice(source.index, 1);
         newTaskIds.splice(destination.index, 0, draggableId);
 
-        const newColumn = {
+        const newStatus = {
             ...start,
-            taskIds: newTaskIds
+            tasks: newTaskIds
         };
 
         const newState = {
             ...state,
-            columns:{
-                ...state.columns,
-                [newColumn.id]: newColumn
+            statuses:{
+                ...state.statuses,
+                [newStatus.id]: newStatus
             }
         };
         return newState;
     }
 
     //moving between columns
-    const startTaskIds = Array.from(start.taskIds);
+    const startTaskIds = Array.from(start.tasks);
     startTaskIds.splice(source.index, 1);
     const newStart = {
         ...start,
-        taskIds: startTaskIds
+        tasks: startTaskIds
     }
 
-    const finishTaskIds = Array.from(finish.taskIds);
+    const finishTaskIds = Array.from(finish.tasks);
     finishTaskIds.splice(destination.index, 0, draggableId);
     const newFinish = {
         ...finish,
-        taskIds: finishTaskIds
+        tasks: finishTaskIds
     };
 
     const newState = {
         ...state,
-        columns: {
-            ...state.columns,
+        statuses: {
+            ...state.statuses,
             [newStart.id]: newStart,
             [newFinish.id]: newFinish
         }

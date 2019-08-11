@@ -1,45 +1,54 @@
 import React from 'react';
-import {Row, Col, Card} from 'antd';
+import { Icon} from 'antd';
 import "../../styles/tasks-panel.css"
 import TasksColumn from "./TasksColumn.component";
 import {DragDropContext} from "react-beautiful-dnd";
 import { connect } from "react-redux";
-import {moveTask} from "../../state/tasks/actions";
+import {getTasks, moveTask, showTaskModal, updateTaskStatus} from "../../state/tasks/actions";
+import TaskModal from './TaskModal.component';
+import {getUsers} from "../../state/users/actions";
 class TasksPanel extends React.Component{
     constructor(props)
     {
         super(props);
         this.state = props.tasks;
         this.updateTask = this.updateTask.bind(this);
+        this.showTaskModal = this.showTaskModal.bind(this);
     }
 
     updateTask(result)
     {
-        console.log(result);
-        console.log(this.props);
-        this.props.moveTask(result);
-        // document.body.style.color = 'inherit';
-
-
+        this.props.updateTaskStatus(result);
     }
 
+    showTaskModal()
+    {
+        this.props.showTaskModal();
+    }
+
+    componentDidMount()
+    {
+        this.props.getTasks();
+        this.props.getUsers();
+    }
 
     render()
     {
-        const data = this.state;
-
+        const data = this.props.tasks;
         return(
             <div>
+                <Icon onClick={this.showTaskModal} className="addTask" type="plus-circle" />
                 <DragDropContext
                     onDragEnd={(result) => this.updateTask(result)}
                 >
                 <div className="task-columns-container">
-                    {data.columnOrder.map((column) => {
+                    {data.status_order.map((status) => {
 
-                        return <TasksColumn key={column} column={column}/>
+                        return <TasksColumn key={status} status={status}/>
                     })}
                 </div>
                 </DragDropContext>
+                <TaskModal/>
             </div>
         )
     }
@@ -49,4 +58,4 @@ const mapStateToProps = state => (
         tasks: state.tasks
     }
 )
-export default connect(mapStateToProps, {moveTask})(TasksPanel);
+export default connect(mapStateToProps, {getUsers, showTaskModal,updateTaskStatus, getTasks})(TasksPanel);

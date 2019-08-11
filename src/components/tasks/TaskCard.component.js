@@ -5,33 +5,23 @@ import {Draggable} from "react-beautiful-dnd";
 import {connect} from "react-redux";
 import "../../styles/tasks-panel.css"
 import Task from "./Task.component";
+import {showTaskModal} from "../../state/tasks/actions";
 
 class TaskCard extends React.Component {
     constructor(props)
     {
-        super(props)
+        super(props);
         this.state = {
             showModal: false
         };
         this.openTaskModal= this.openTaskModal.bind(this);
-        this.closeTaskModal= this.closeTaskModal.bind(this);
     }
 
     openTaskModal()
     {
-        this.setState({
-            ...this.state,
-            showModal: true
-        })
+       this.props.showTaskModal(this.props.task.id);
     }
 
-    closeTaskModal()
-    {
-        this.setState({
-            ...this.state,
-            showModal: false
-        })
-    }
 
     render()
     {
@@ -53,7 +43,7 @@ class TaskCard extends React.Component {
                             <Card
                                 onClick={this.openTaskModal}
                                 >
-                                {this.props.task.content}
+                                {this.props.task.title}
                             </Card>
                             </div>
 
@@ -63,16 +53,7 @@ class TaskCard extends React.Component {
                     }
 
                 </Draggable>
-                <Modal
-                    visible={this.state.showModal}
-                    onCancel={this.closeTaskModal}
-                    footer={null}
 
-                >
-                <Task taskId={this.props.taskId}>
-
-                </Task>
-                </Modal>
             </div>
 
         )
@@ -85,4 +66,4 @@ function mapStateToProps(state, ownProps) {
 }
 
 
-export default connect(mapStateToProps)(TaskCard);
+export default connect(mapStateToProps, {showTaskModal})(TaskCard);

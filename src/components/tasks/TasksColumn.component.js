@@ -18,13 +18,13 @@ class TasksColumn extends React.Component {
                 <div>
                     <div>
                         <h1 style={{textAlign: "center"}}>
-                            {this.props.column}
+                            {this.props.status.name}
                         </h1>
                     </div>
                 </div>
 
                 <Droppable
-                    droppableId={this.props.column}
+                    droppableId={this.props.status.id}
                     // type={this.props.column}
                 >
                     {(provided, snapshot) => (
@@ -50,7 +50,8 @@ class TasksColumn extends React.Component {
 
 function mapStateToProps(state, ownProps) {
     return {
-        taskIds: state.tasks.columns[ownProps.column].taskIds
+        taskIds: state.tasks.statuses[ownProps.status].tasks,
+        status: state.tasks.statuses[ownProps.status],
     }
 }
 
