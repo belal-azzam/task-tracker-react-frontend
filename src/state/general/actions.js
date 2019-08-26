@@ -1,4 +1,3 @@
-import axios from 'axios';
 import {REMOVE_MESSAGE, SET_MESSAGE} from "./types";
 
 

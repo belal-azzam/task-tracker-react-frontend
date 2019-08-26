@@ -26,7 +26,7 @@ class Message extends React.Component {
         const message = this.props.message.message;
         const messageType = this.props.message.type;
         return (
-            <div >
+            <div className="message-container">
                 {message  ? <Alert message={message} type={messageType} /> : ""}
             </div>
 

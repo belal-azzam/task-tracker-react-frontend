@@ -1,1 +1,5 @@
 export const SET_USERS = 'SET_USERS';
+export const SET_AUTH_USER_DATA = 'SET_AUTH_USER_DATA';
+export const LOGOUT = 'LOGOUT';
+export const SET_REGISTER_ERRORS = "SET_REGISTER_ERRORS";
+export const SET_LOGIN_ERROR = 'SET_LOGIN_ERROR';

@@ -36,7 +36,7 @@ class TasksPanel extends React.Component{
     {
         const data = this.props.tasks;
         return(
-            <div>
+            <div id="tasks-panel">
                 <Icon onClick={this.showTaskModal} className="addTask" type="plus-circle" />
                 <DragDropContext
                     onDragEnd={(result) => this.updateTask(result)}

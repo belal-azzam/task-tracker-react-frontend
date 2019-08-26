@@ -2,6 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import {addTask, updateTask} from "../../state/tasks/actions";
+import {Link} from "react-router-dom";
 class Task extends React.Component{
 
     constructor(props)
@@ -31,7 +32,6 @@ class Task extends React.Component{
     }
 
     updateState(evt){
-        console.log('55');
         this.setState({
             ...this.state,
             task: {
@@ -43,17 +43,20 @@ class Task extends React.Component{
     }
 
     render(){
+        const task = this.state.task;
         return (
             <div>
+                <h4></h4>
+                <hr/>
                 <form onChange={(evt) => this.updateState(evt)} name='form'  onSubmit={(evt) => this.saveTask(evt)}>
                     <div className="form-row">
                         <div className="form-group col-md-12">
                             <label htmlFor="title">Title</label>
-                            <input value={this.state.task.title} type="text" className="form-control" id="title" placeholder="Title" />
+                            <input  required value={this.state.task.title} type="text" className="form-control" id="title" placeholder="Title" />
                         </div>
                         <div className="form-group col-md-12">
                             <label htmlFor="description">Description</label>
-                            <textarea value={this.state.task.description} name='description' className="form-control" id="description" rows="6"></textarea>
+                            <textarea  value={this.state.task.description} name='description' className="form-control" id="description" rows="6"></textarea>
                         </div>
                     </div>
 
@@ -61,7 +64,7 @@ class Task extends React.Component{
 
                         <div className="form-group col-md-6">
                             <label htmlFor="status_id">Status</label>
-                            <select  value={this.state.task.status_id} id="status_id" name="status_id" className="form-control">
+                            <select required value={this.state.task.status_id} id="status_id" name="status_id" className="form-control">
                                 {Object.keys(this.props.statuses).map(statusId => {
                                     return <option key={statusId} value={this.props.statuses[statusId].id}>{this.props.statuses[statusId].name}</option>
                                 })}
@@ -69,7 +72,8 @@ class Task extends React.Component{
                         </div>
                         <div className="form-group col-md-6">
                             <label htmlFor="assigned_user_id">Assignee</label>
-                            <select onChange={(evt) => this.updateState(evt)}  value={this.state.task.assigned_user_id} id="assigned_user_id" name="assigned_user_id" className="form-control">
+                            <select required onChange={(evt) => this.updateState(evt)}  value={this.state.task.assigned_user_id} id="assigned_user_id" name="assigned_user_id" className="form-control">
+                                <option value="">Select Assignee</option>
                                 {Object.keys(this.props.users).map(userId => {
                                     return <option key={userId} value={this.props.users[userId].id}>{this.props.users[userId].username}</option>
                                 })}
@@ -77,7 +81,7 @@ class Task extends React.Component{
                         </div>
                         <div className="form-group col-md-6">
                             <label htmlFor="type_id">Type</label>
-                            <select   value={this.state.task.type_id} id="type_id" name="type_id" className="form-control">
+                            <select  required value={this.state.task.type_id} id="type_id" name="type_id" className="form-control">
                                 {Object.keys(this.props.types).map(typeId => {
                                     return <option key={typeId} value={this.props.types[typeId].id}>{this.props.types[typeId].name}</option>
                                 })}
@@ -88,6 +92,10 @@ class Task extends React.Component{
                             <select  value={this.state.task.task_id} id="task_id" name="task_id" className="form-control">
                                 <option value="0"></option>
                                 {Object.keys(this.props.tasks).map(taskId => {
+                                    if(taskId == task.id)
+                                    {
+                                        return null;
+                                    }
                                     return <option key={taskId} value={this.props.tasks[taskId].id}>{this.props.tasks[taskId].title}</option>
                                 })}
                             </select>
@@ -111,23 +119,23 @@ class Task extends React.Component{
     }
 }
 const mapSstateToProps = (state, props) => {
+
     let task = {
         title: '',
         description: '',
-        status_id: '',
-        type_id: null,
+        status_id: state.tasks.statuses[Object.keys(state.tasks.statuses)[0]].id,
+        type_id: state.tasks.types[Object.keys(state.tasks.types)[0]].id,
         task_id: null,
         time_estimate: null,
         actual_time: null,
         assigned_user_id: null,
 
     };
-    console.log(props);
     if(props.taskId)
     {
-        console.log(state.tasks.tasks);
         task =  state.tasks.tasks[props.taskId];
-        console.log(task);
+    }else{
+
     }
     return {
         task: task,

@@ -1,6 +1,6 @@
 import {REMOVE_MESSAGE, SET_MESSAGE} from "./types";
 const initialState = {
-    "message": {message: "error", type: "error"}
+    "message": {message: "", type: ""}
 };
 
 export default function (state = initialState, action) {

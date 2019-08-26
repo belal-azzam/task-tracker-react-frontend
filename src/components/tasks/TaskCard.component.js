@@ -43,7 +43,7 @@ class TaskCard extends React.Component {
                             <Card
                                 onClick={this.openTaskModal}
                                 >
-                                {this.props.task.title}
+                                <strong>{this.props.task.title}</strong>
                             </Card>
                             </div>
 
