@@ -1,3 +1,5 @@
+this a the frontend for the [simple-task-tracker-project](https://github.com/belal-azzam/simple-task-tracker).
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
